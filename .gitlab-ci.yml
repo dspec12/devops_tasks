@@ -1,0 +1,61 @@
+stages:
+  - lint
+  - build
+  - deploy
+
+# Lints Kube deployment yamls.
+lint:
+  stage: lint
+  image: debian:buster-slim
+  before_script:
+    - apt-get update
+    - apt-get install wget ca-certificates curl -y
+    - wget https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
+    - tar xf kubeval-linux-amd64.tar.gz
+    - mv kubeval /usr/local/bin
+    - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
+    - mv kustomize /usr/local/bin/
+  script:
+    - cd deploy
+    - kustomize build . | kubeval
+
+# Setup assumes proper setup of a dedicated gitlab-runner running docker-in-docker
+# https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#use-the-docker-executor-with-the-docker-image-docker-in-docker
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    # Assuming gitlab registry
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - cd build
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+  # Only builds on merges/pushes to master branch
+  only:
+    - master
+
+# My preferred method  deploying to Kubernetes is to leverage something like ArgoCD, where your kube yaml is monitored for changes.
+# In that case we would use kustomize to update the image. To keep things simple, we will use Kubectl to push the yaml.
+deploy:
+  stage: deploy
+  image: debian:buster-slim
+  before_script:
+    - apt-get update
+    - apt-get install curl ca-certificates -y
+    - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
+    - mv kustomize /usr/local/bin/
+    - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    - mv kubectl /usr/local/bin/
+    # Kubectl will need configuration. Something like Vault could be used here.
+    - kubeclt config set-context <prod-cluster>
+  script: 
+    - cd deploy
+    - kustomize edit set image $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - kustomize build . | kubectl apply -f -
+  only:
+    - master
+  # Manual step to trigger deployment
+  when: manual

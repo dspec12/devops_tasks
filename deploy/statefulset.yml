@@ -1,0 +1,46 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: litecoin-statefulset
+  labels:
+    app: litecoin
+spec:
+  serviceName: "litecoin-svc"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: litecoin
+  template:
+    metadata:
+      labels:
+        app: litecoin
+    spec:
+      containers:
+        - name: litecoin
+          # Made up image location:tag
+          image: 'repo/image:latest'
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 250m
+            # Arbitrary limits  
+            limits:
+              memory: 6Gi
+              cpu: 2
+          volumeMounts:
+            - name: litecoin-data
+              mountPath: /opt/litecoin/litecoin-data
+  # yamllint disable-line rule:line-length
+  # Source: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#stable-storage
+  # Provisions a PVC using the clusters storage class
+  volumeClaimTemplates:
+    - metadata:
+      name: litecoin-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        # Not normally needed if using the default storage class
+        storageClassName: "gp2"
+      resources:
+        requests:
+          storage: 50Gi

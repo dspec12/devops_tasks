@@ -1,0 +1,14 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- service.yml
+- statefulset.yml
+commonLabels:
+  app: litecoin
+generatorOptions:
+  labels:
+    app: litecoin
+images:
+- name: repo/image
+  newTag: tag # This will be generated and set by gitlab-ci.yml line 54
