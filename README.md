@@ -1,9 +1,10 @@
-# DevOps Test
+# DevOps Tasks
 
 ## Build
 * Dockerfile that performs a multistage build. In the build stage dependencies are installed, and the application is downloaded and verified. The artifacts are then copied into the final stage.
 <br>
 <br>
+
 ## Deploy
 * Kubernetes yaml for a statefulset and supporting objects. Tied together with kustomize: https://kustomize.io/
 
