@@ -26,12 +26,12 @@ def main():
             rotate_log(log_path)
 
     for tar in p.rglob("*.tar.gz"):
-        assert log.exists()
-        tar_path = log.resolve()
+        assert tar.exists()
+        tar_path = str(tar.resolve())
         tar_age = fileage_delta(tar.stat().st_mtime)
         if tar_age >= 90:
             print(f"Removing: {tar_path}")
-            os.remove(log_path)
+            os.remove(tar_path)
 
 
 def rotate_log(log_path):
