@@ -3,7 +3,7 @@ stages:
   - build
   - deploy
 
-# Lints Kube deployment yamls.
+# Lint Kube deployment yaml.
 lint:
   stage: lint
   image: debian:buster-slim
