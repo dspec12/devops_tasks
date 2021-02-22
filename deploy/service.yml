@@ -19,3 +19,6 @@ spec:
     - protocol: TCP
       port: 19333
       targetPort: 19333
+    - protocol: TCP
+      port: 19444
+      targetPort: 19444
