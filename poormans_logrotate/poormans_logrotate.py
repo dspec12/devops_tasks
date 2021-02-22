@@ -5,7 +5,7 @@ from pathlib import Path
 from datetime import datetime
 import tarfile
 
-target_dir = "/home/dan/Git/devops_test/poormans_logrotate/logs"
+target_dir = "/var/log"
 
 
 def main():
