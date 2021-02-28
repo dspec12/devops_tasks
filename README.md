@@ -32,4 +32,7 @@ PASS - stdin contains a valid StatefulSet (litecoin-statefulset)
 <br>
 
 ## Terraform
-* Did not have enough free time to get to this. While I have used terraform in the past, it's been about a year, and I need to review some documentation. I do feel like I have a strong grasp on the concepts and happy to speak on this topic.
+* main.tf - Defines providers, resources, and data sources
+* variables.tf - Vars to set the region and environment. Defaults are provided so not necessary
+* .terraform.lock.hcl - Lock file that pins provder versions with a hash
+* versions.tf - Set TF binary version requirement
